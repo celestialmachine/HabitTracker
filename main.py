@@ -5,7 +5,13 @@
 from fastapi import FastAPI, HTTPException, Request
 from fastapi.middleware.cors import CORSMiddleware
 from database import get_connection
-from auth import hash_password, verify_password, generate_token, verify_token
+from auth import (
+    hash_password,
+    verify_password,
+    generate_token,
+    verify_token,
+    extract_token_from_header,
+)
 from pydantic import BaseModel, field_validator
 
 import psycopg2
@@ -122,7 +128,9 @@ def create_user(user: UserCreate):
 @app.post("/habits", status_code=201)
 def create_habit(habit: HabitCreate, request: Request):
     content = habit.content
-    decoded_payload = verify_token(request)
+    token = extract_token_from_header(request)
+
+    decoded_payload = verify_token(token)
     user_id = decoded_payload["user_id"]
 
     conn = get_connection()

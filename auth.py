@@ -28,9 +28,13 @@ def generate_token(payload):
     return jwt.encode(payload, SECRET_KEY, algorithm="HS256")
 
 
-def verify_token(request: Request) -> dict:
+def extract_token_from_header(request: Request):
     auth_header = request.headers["Authorization"]
     token = auth_header.split(" ")[1]
+    return token
+
+
+def verify_token(token: str) -> dict:
     try:
         decoded_payload = jwt.decode(token, SECRET_KEY, algorithms=["HS256"])
         return decoded_payload
