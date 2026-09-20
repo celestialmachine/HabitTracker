@@ -128,3 +128,25 @@ db in venv
 - fetch(): built in js fx provided by the browser that is specifically designed for making HTTP reqs
 
 ## Git workflow
+
+- branches are just named pointers to a specific commit — not separate copies of files!
+- my actual files on disk get rewritten by Git to match whichever branch I'm currently "on."so switching branches = Git rewrites my files to match that branch's latest commit.
+
+**Full cycle:**
+
+1. `git checkout -b <branch-name>` — create + switch to a new branch off `main`
+2. Make changes, `git add`, `git commit` as normal — these commits only exist on this branch, `main` is untouched
+3. `git push -u origin <branch-name>` — push the branch to GitHub (`-u` only needed the first push; sets up tracking)
+4. Open a Pull Request on GitHub (base: `main`, compare: your branch)
+5. Review the diff
+6. Merge the PR via GitHub's UI
+7. Locally: `git checkout main` then `git pull` — syncs local `main` with the merge that happened on GitHub
+8. Delete the branch — locally (`git branch -d <branch-name>`) and on GitHub (`git push origin --delete <branch-name>` or via the button GitHub shows after merging)
+   - **Order matters:** pull BEFORE deleting locally, or Git may think the branch has unmerged work (since local `main` doesn't know about the merge yet)
+
+**Key terms:**
+
+- `origin` = the name for "my remote repo" (GitHub) — not a branch name
+- `git push` = send my local commits up to GitHub
+- `git pull` = fetch + merge remote changes into my current local branch
+- Deleting a merged branch does NOT delete the commits — they already live in `main`'s history via the merge. Deleting just removes the now-unneeded label/pointer.

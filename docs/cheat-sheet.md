@@ -18,6 +18,7 @@ A quick-reference guide for running the local server, interacting with the datab
 - switch branches: `git checkout {branch_name}` or `git switch`
 - just create new branch: `git checkout {branch_name}`
 - merging branch back to main: `git checkout main` AND `git merge {branch_name}`
+- see list of branches: `git branch`
 
 ## PostgreSQL (`psql`) Commands
 
