@@ -19,6 +19,8 @@ A quick-reference guide for running the local server, interacting with the datab
 - just create new branch: `git checkout {branch_name}`
 - merging branch back to main: `git checkout main` AND `git merge {branch_name}`
 - see list of branches: `git branch`
+- delete an old branch from github: `git push origin --delete {old_branch_name}`
+- refresh your remote-tracking references aka tells git go check what actually exists on the remote right now, and remove any local references to remote branches that no longer really exist there.`git fetch --prune`
 
 ## PostgreSQL (`psql`) Commands
 
