@@ -1,16 +1,6 @@
 # Project Takeaways & Lessons Learned
 
-My brain dump of conceptual thoughts, software principles I attempted to apply and lessons learned during development
-
-## Historical vs. mutable data
-
-**Context:** Completions table rows represent historical facts (e.g., "this habit was completed on this date") - they should only ever be inserted or deleted, never updated, since mutating a historical record risks losing information that can't be recovered.
-
-**Design question:** If a user deletes a habit, should that cascade-delete its completion history or should the habit be soft-deleted instead (preserving history)?
-
-**Decision:** Soft-delete via an `is_active` flag on `habits`. When a user "deletes" a habit, `is_active` is set to `False` rather than removing the row - this preserves the habit's full completion history rather than losing it to a cascade delete.
-
-**Confirm with Victor:** whether `is_active`-based soft delete is the right approach here or if there's a more standard pattern for this kind of historical-data preservation.
+Brain dump of my "aha" moments aka conceptual thoughts, software principles I attempted to apply and lessons learned during development
 
 ## Backend logic
 
@@ -26,13 +16,15 @@ My brain dump of conceptual thoughts, software principles I attempted to apply a
 
 ## HTTP Requests
 
-An HTTP request has a few separate parts, and they don't mix:
+- An HTTP request has a few separate parts, and they don't mix:
+- The URL/route — POST /habits, tells FastAPI which function to run
+  Headers — metadata about the request, sits separately from the body. This is where Authorization: Bearer <token> lives
+  The body — the actual payload, in your case the JSON you're sending: {habit: "...", frequency: "..."}
+- Your BaseModel is specifically wired to look at #3, the body. It has no idea headers even exist — that's not what it's for. So you're right that your habit content comes in through the BaseModel, but the token needs a separate mechanism, because it lives in a separate part of the request.
 
-The URL/route — POST /habits, tells FastAPI which function to run
-Headers — metadata about the request, sits separately from the body. This is where Authorization: Bearer <token> lives
-The body — the actual payload, in your case the JSON you're sending: {habit: "...", frequency: "..."}
-
-Your BaseModel is specifically wired to look at #3, the body. It has no idea headers even exist — that's not what it's for. So you're right that your habit content comes in through the BaseModel, but the token needs a separate mechanism, because it lives in a separate part of the request.
+- GET requests do not have a body! so data must be sent via URL using query params
+  - since no body, no need for content-type header!
+  - only need auth header to verify token
 
 ## FastAPI
 
@@ -150,3 +142,23 @@ db in venv
 - `git push` = send my local commits up to GitHub
 - `git pull` = fetch + merge remote changes into my current local branch
 - Deleting a merged branch does NOT delete the commits — they already live in `main`'s history via the merge. Deleting just removes the now-unneeded label/pointer.
+
+## Git workflow: catching prerequisite work mid-branch
+
+I noticed a pattern in myself: I'll start working on one feature (e.g., GET /habits endpoint) on its own branch, then realize partway through that I actually need something else first (e.g., adding an `is_active` flag to habits) — and instead of pausing to create a separate branch for that prerequisite, I just kept building it into my current branch.
+
+**Why this isn't ideal:** each branch/PR is supposed to represent one coherent, describable unit of work. Mixing "add is_active flag" into "add GET /habits endpoint" means the branch no longer cleanly represents just one thing, which makes the diff/history less clean than it should be.
+
+**What I should do instead, when I notice this happening mid-branch:**
+
+1. Pause current work (commit or stash)
+2. Switch back to `main`
+3. Create a new branch specifically for the prerequisite
+4. Finish + merge that prerequisite on its own
+5. Switch back to the original branch and merge `main` into it to pick up the prerequisite, then continue
+
+**Why I didn't do the "ideal" version this time:** it adds real overhead, and since I'm working solo (not colliding with teammates), the cost of not doing this perfectly is low right now. I recognized the pattern, decided the overhead wasn't worth it for something this small-scale, and kept going in the same branch deliberately, rather than by accident.
+
+**The bigger takeaway:** this is the same underlying instinct as realizing "I need bcrypt hashing before I can build JWT auth" — discovering a hidden prerequisite mid-task. That happens naturally and isn't a flaw in my process; the skill to build is recognizing EARLY when a prerequisite is substantial enough to deserve its own branch, vs. small enough to just fold into current work.
+
+**For interviews:** this is a good example of self-awareness about workflow/process — I can describe noticing an imperfect git habit in myself, understanding _why_ it's not ideal, and articulating the tradeoff I made (perfect branch hygiene vs. practical solo-project overhead), rather than just blindly following a rule without understanding it.

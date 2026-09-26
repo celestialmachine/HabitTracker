@@ -80,3 +80,35 @@ A quick-reference guide for running the local server, interacting with the datab
 - 502 Bad Gateway: The server, while acting as a gateway or proxy, received an invalid response from the upstream server
 - 503 Service Unavailable: The server is currently unable to handle the request due to temporary overloading or maintenance
 - 504 Gateway Timeout: The server, while acting as a gateway or proxy, did not receive a timely response from the upstream server
+
+# Curl
+
+## Login (return token)
+
+```
+curl -i -X POST http://localhost:8000/logins \
+-H "Content-Type: application/json" \
+-d '{"username": "michy7", "password": "password123"}'
+```
+
+returned token:
+eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoxMSwidXNlcm5hbWUiOiJtaWNoeTcifQ.5TUR1RuXTwIWwoo8EB1X2myZ3YwvjTclFx-vYpiIzn4
+
+## Add a habit
+
+```
+curl -i -X POST http://localhost:8000/habits \
+-H "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoxMSwidXNlcm5hbWUiOiJtaWNoeTcifQ.5TUR1RuXTwIWwoo8EB1X2myZ3YwvjTclFx-vYpiIzn4" \
+-H "Content-Type: application/json" \
+-d '{"content": "buy a matcha"}'
+
+```
+
+## Get all habits
+
+```
+curl -i http://localhost:8000/habits \
+-H "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoxMSwidXNlcm5hbWUiOiJtaWNoeTcifQ.5TUR1RuXTwIWwoo8EB1X2myZ3YwvjTclFx-vYpiIzn4" \
+-H "Content-Type: application/json"
+-d "
+```
