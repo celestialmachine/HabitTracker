@@ -30,3 +30,6 @@ def test_verify_tampered_token_raises_error():
     with pytest.raises(HTTPException) as exc_info:
         verify_token(tampered_token)
     assert exc_info.value.status_code == 401
+
+
+# TODO: test expired token
