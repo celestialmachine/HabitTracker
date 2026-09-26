@@ -32,6 +32,14 @@
 - saving habit to wrong user due to missing token/invalid token? -> BE should reject request
 - can user create two habits with same content? -> no, DB requires habits to be unique
 
+### Mark a habit as complete for the current date
+
+### Mark a habit as incomplete for the current date
+
+### "Delete" a habit
+
+Sets the habit's is_active flag from True to False
+
 ### See all habits
 
 **main flow**
