@@ -19,6 +19,7 @@ A quick-reference guide for running the local server, interacting with the datab
 - just create new branch: `git checkout {branch_name}`
 - merging branch back to main: `git checkout main` AND `git merge {branch_name}`
 - see list of branches: `git branch`
+- push a branch to github for first time: `git push -u origin {name_of_branch_getting_first_push}`
 
 ## PostgreSQL (`psql`) Commands
 

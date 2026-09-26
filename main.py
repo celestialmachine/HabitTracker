@@ -163,3 +163,11 @@ def get_habits(request: Request):
         return habits
     except:
         return {"message": "Something went wrong"}
+
+
+@app.patch("/habits", status_code=200)
+def mark_habit_complete():
+    try:
+        return
+    except:
+        return
