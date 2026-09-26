@@ -36,6 +36,8 @@
 
 ### Mark a habit as incomplete for the current date
 
+Deletes the row from the completions table
+
 ### "Delete" a habit
 
 Sets the habit's is_active flag from True to False
