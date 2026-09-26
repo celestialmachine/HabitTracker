@@ -146,3 +146,20 @@ def create_habit(habit: HabitCreate, request: Request):
         return {"message": "Habit successfully created!", "habit_id": habit_id}
     except:
         return {"message": "Something went wrong!"}
+
+
+@app.get("/habits", status_code=201)
+def get_habits(request: Request):
+    token = extract_token_from_header(request)
+    decoded_payload = verify_token(token)
+    user_id = decoded_payload["user_id"]
+
+    conn = get_connection()
+    cursor = conn.cursor()
+
+    try:
+        cursor.execute("SELECT * FROM habits WHERE user_id = %s;", (user_id,))
+        habits = cursor.fetchall()
+        return habits
+    except:
+        return {"message": "Something went wrong"}
