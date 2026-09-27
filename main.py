@@ -184,4 +184,7 @@ def mark_habit_complete(habit_id: int, request: Request):
         )
         return {"message": f"Habit id#{habit_id} has been marked as completed"}
     except psycopg2.errors.UniqueViolation as e:
-        return {"message": f"Habit id#{habit_id} has already been marked as complete."}
+        raise HTTPException(
+            status_code=400,
+            detail=f"Habit id#{habit_id} has already been marked as complete.",
+        )
