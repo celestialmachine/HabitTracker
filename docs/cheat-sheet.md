@@ -24,6 +24,7 @@ A quick-reference guide for running the local server, interacting with the datab
 - refresh your remote-tracking references aka tells git go check what actually exists on the remote right now, and remove any local references to remote branches that no longer really exist there.`git fetch --prune`
 - applies most recent stash and removes it from list: `git stash pop`
 - applies the specified stash and removes it from the list: `git stash pop stash@{stash_number}`
+- `git stash push -m "{description}" {files}`
 
 ## PostgreSQL (`psql`) Commands
 

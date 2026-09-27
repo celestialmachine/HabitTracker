@@ -123,6 +123,8 @@ db in venv
 
 - branches are just named pointers to a specific commit — not separate copies of files!
 - my actual files on disk get rewritten by Git to match whichever branch I'm currently "on."so switching branches = Git rewrites my files to match that branch's latest commit.
+- stashes are not tied to a specific branch at all so if I was to `git stash pop` on a branch, it would apply the most recent stash changes to whichever branch I am currently on
+- helpful to be specific in what files I want to stash and include a message so it's less confusing
 
 **Full cycle:**
 
