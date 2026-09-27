@@ -30,9 +30,48 @@ An HTTP request has a few separate parts, and they don't mix:
 
 The URL/route — POST /habits, tells FastAPI which function to run
 Headers — metadata about the request, sits separately from the body. This is where Authorization: Bearer <token> lives
-The body — the actual payload, in your case the JSON you're sending: {habit: "...", frequency: "..."}
+The body — the actual payload, in your case the JSON you're sending: {content: "..."}
 
 Your BaseModel is specifically wired to look at #3, the body. It has no idea headers even exist — that's not what it's for. So you're right that your habit content comes in through the BaseModel, but the token needs a separate mechanism, because it lives in a separate part of the request.
+
+There are three main places data can travel in an HTTP request, plus a fourth less obvious one (cookies).
+
+**1. URL**
+
+- **Path parameters** - part of the URL structure itself, marked with `{}` in the route definition. Used for identifying a specific resource. e.g. `{habit_id}` in `/habits/{habit_id}/complete`
+- **Query parameters** - appended after `?` in the URL. Used for optional filters/modifiers. e.g. `?status=complete` in `/habits?status=complete`
+
+**2. Request body**
+
+- The actual JSON payload sent with the request - what my Pydantic `BaseModel` classes parse.
+- Typically used with `POST`/`PUT`/`PATCH`, rarely with `GET`.
+- I've used this for: `UserCreate`, `LoginRequest`, `HabitCreate`
+
+**3. Headers**
+
+- Metadata about the request itself, separate from the URL and body.
+- I've used this for: `Authorization: Bearer <token>` (JWT auth), `Content-Type: application/json`
+
+**4. Cookies (haven't used yet, but worth knowing)**
+
+- Sent automatically by the browser with every request to a given domain, without manually attaching them like a header/body value each time.
+- Relevant for session-based auth (an alternative to JWT, where the token lives in a cookie instead of requiring a manually-attached Authorization header).
+
+## Quick reference table (what I've actually used)
+
+| Location        | What I use it for                           |
+| --------------- | ------------------------------------------- |
+| Path parameter  | `habit_id` in `/habits/{habit_id}/complete` |
+| Query parameter | `status` in `/habits?status=complete`       |
+| Request body    | `UserCreate`, `LoginRequest`, `HabitCreate` |
+| Header          | `Authorization: Bearer <token>`             |
+
+## How FastAPI decides where to look for each param
+
+- Plain type (`str`, `int`), matching a `{}` in the URL path -> path parameter
+- Plain type, NOT in the URL path -> query parameter
+- Pydantic `BaseModel` type -> request body (parsed as JSON)
+- Declared via `Header(...)` or extracted from a `Request` object -> headers
 
 ## FastAPI
 
