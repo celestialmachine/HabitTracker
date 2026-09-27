@@ -19,6 +19,11 @@ A quick-reference guide for running the local server, interacting with the datab
 - just create new branch: `git checkout {branch_name}`
 - merging branch back to main: `git checkout main` AND `git merge {branch_name}`
 - see list of branches: `git branch`
+- delete an old branch from github: `git push origin --delete {old_branch_name}`
+- refresh your remote-tracking references aka tells git go check what actually exists on the remote right now, and remove any local references to remote branches that no longer really exist there.`git fetch --prune`
+- to stash edits I am not ready to commit yet: `git stash`
+- to see list of stashes: `git stash list`
+- to see what is inside a stash (most recent one)`git stash show -p stash@{0}`
 
 ## PostgreSQL (`psql`) Commands
 
@@ -78,3 +83,35 @@ A quick-reference guide for running the local server, interacting with the datab
 - 502 Bad Gateway: The server, while acting as a gateway or proxy, received an invalid response from the upstream server
 - 503 Service Unavailable: The server is currently unable to handle the request due to temporary overloading or maintenance
 - 504 Gateway Timeout: The server, while acting as a gateway or proxy, did not receive a timely response from the upstream server
+
+# Curl
+
+## Login (return token)
+
+```
+curl -i -X POST http://localhost:8000/logins \
+-H "Content-Type: application/json" \
+-d '{"username": "michy7", "password": "password123"}'
+```
+
+returned token:
+eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoxMSwidXNlcm5hbWUiOiJtaWNoeTcifQ.5TUR1RuXTwIWwoo8EB1X2myZ3YwvjTclFx-vYpiIzn4
+
+## Add a habit
+
+```
+curl -i -X POST http://localhost:8000/habits \
+-H "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoxMSwidXNlcm5hbWUiOiJtaWNoeTcifQ.5TUR1RuXTwIWwoo8EB1X2myZ3YwvjTclFx-vYpiIzn4" \
+-H "Content-Type: application/json" \
+-d '{"content": "buy a matcha"}'
+
+```
+
+## Get all habits
+
+```
+curl -i http://localhost:8000/habits \
+-H "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoxMSwidXNlcm5hbWUiOiJtaWNoeTcifQ.5TUR1RuXTwIWwoo8EB1X2myZ3YwvjTclFx-vYpiIzn4" \
+-H "Content-Type: application/json"
+-d "
+```

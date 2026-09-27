@@ -1,16 +1,6 @@
 # Project Takeaways & Lessons Learned
 
-My brain dump of conceptual thoughts, software principles I attempted to apply and lessons learned during development
-
-## Historical vs. mutable data
-
-**Context:** Completions table rows represent historical facts (e.g., "this habit was completed on this date") - they should only ever be inserted or deleted, never updated, since mutating a historical record risks losing information that can't be recovered.
-
-**Design question:** If a user deletes a habit, should that cascade-delete its completion history or should the habit be soft-deleted instead (preserving history)?
-
-**Decision:** Soft-delete via an `is_active` flag on `habits`. When a user "deletes" a habit, `is_active` is set to `False` rather than removing the row - this preserves the habit's full completion history rather than losing it to a cascade delete.
-
-**Confirm with Victor:** whether `is_active`-based soft delete is the right approach here or if there's a more standard pattern for this kind of historical-data preservation.
+Brain dump of my "aha" moments aka conceptual thoughts, software principles I attempted to apply and lessons learned during development
 
 ## Backend logic
 
@@ -32,7 +22,9 @@ The URL/route — POST /habits, tells FastAPI which function to run
 Headers — metadata about the request, sits separately from the body. This is where Authorization: Bearer <token> lives
 The body — the actual payload, in your case the JSON you're sending: {content: "..."}
 
-Your BaseModel is specifically wired to look at #3, the body. It has no idea headers even exist — that's not what it's for. So you're right that your habit content comes in through the BaseModel, but the token needs a separate mechanism, because it lives in a separate part of the request.
+- GET requests do not have a body! so data must be sent via URL using query params
+  - since no body, no need for content-type header!
+  - only need auth header to verify token
 
 There are three main places data can travel in an HTTP request, plus a fourth less obvious one (cookies).
 
@@ -189,7 +181,3 @@ db in venv
 - `git push` = send my local commits up to GitHub
 - `git pull` = fetch + merge remote changes into my current local branch
 - Deleting a merged branch does NOT delete the commits — they already live in `main`'s history via the merge. Deleting just removes the now-unneeded label/pointer.
-
-## Auto-incrementing IDs and gaps
-
-Noticed that failed/rolled-back inserts still consume an ID value from the sequence - e.g. if creating user_id=1 fails and the next attempt succeeds, it gets assigned user_id=2, not 1. This is normal, expected Postgres behavior (sequences increment regardless of insert success/failure, since checking success first would hurt performance under concurrent access). Gaps in IDs are completely fine - IDs only need to be unique, not perfectly sequential/gapless.
