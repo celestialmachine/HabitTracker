@@ -21,6 +21,9 @@ A quick-reference guide for running the local server, interacting with the datab
 - see list of branches: `git branch`
 - delete an old branch from github: `git push origin --delete {old_branch_name}`
 - refresh your remote-tracking references aka tells git go check what actually exists on the remote right now, and remove any local references to remote branches that no longer really exist there.`git fetch --prune`
+- to stash edits I am not ready to commit yet: `git stash`
+- to see list of stashes: `git stash list`
+- to see what is inside a stash (most recent one)`git stash show -p stash@{0}`
 
 ## PostgreSQL (`psql`) Commands
 
