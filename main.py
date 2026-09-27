@@ -146,3 +146,42 @@ def create_habit(habit: HabitCreate, request: Request):
         return {"message": "Habit successfully created!", "habit_id": habit_id}
     except:
         return {"message": "Something went wrong!"}
+
+
+@app.get("/habits", status_code=201)
+def get_habits(request: Request):
+    token = extract_token_from_header(request)
+    decoded_payload = verify_token(token)
+    user_id = decoded_payload["user_id"]
+
+    conn = get_connection()
+    cursor = conn.cursor()
+
+    try:
+        cursor.execute("SELECT * FROM habits WHERE user_id = %s;", (user_id,))
+        habits = cursor.fetchall()
+        return habits
+    except:
+        return {"message": "Something went wrong"}
+
+
+@app.post("/habits/{habit_id}/complete", status_code=201)
+def mark_habit_complete(habit_id: int, request: Request):
+    token = extract_token_from_header(request)
+    verify_token(token)  # verify token before proceeding
+
+    conn = get_connection()
+    cursor = conn.cursor()
+    try:
+        cursor.execute(
+            "INSERT INTO completions (habit_id) VALUES (%s) RETURNING completion_id;",
+            (habit_id,),
+        )
+        completion_id = cursor.fetchone()[0]
+        conn.commit()
+        print(
+            f"Habit id#{habit_id} has been marked as complete. Completion id# {completion_id}"
+        )
+        return {"message": f"Habit id#{habit_id} has been marked as completed"}
+    except psycopg2.errors.UniqueViolation as e:
+        return {"message": f"Habit id#{habit_id} has already been marked as complete."}
