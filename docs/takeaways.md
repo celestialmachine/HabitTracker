@@ -189,3 +189,7 @@ db in venv
 - `git push` = send my local commits up to GitHub
 - `git pull` = fetch + merge remote changes into my current local branch
 - Deleting a merged branch does NOT delete the commits — they already live in `main`'s history via the merge. Deleting just removes the now-unneeded label/pointer.
+
+## Auto-incrementing IDs and gaps
+
+Noticed that failed/rolled-back inserts still consume an ID value from the sequence - e.g. if creating user_id=1 fails and the next attempt succeeds, it gets assigned user_id=2, not 1. This is normal, expected Postgres behavior (sequences increment regardless of insert success/failure, since checking success first would hurt performance under concurrent access). Gaps in IDs are completely fine - IDs only need to be unique, not perfectly sequential/gapless.
