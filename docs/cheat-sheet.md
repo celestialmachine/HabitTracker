@@ -19,8 +19,12 @@ A quick-reference guide for running the local server, interacting with the datab
 - just create new branch: `git checkout {branch_name}`
 - merging branch back to main: `git checkout main` AND `git merge {branch_name}`
 - see list of branches: `git branch`
+- push a branch to github for first time: `git push -u origin {name_of_branch_getting_first_push}`
 - delete an old branch from github: `git push origin --delete {old_branch_name}`
 - refresh your remote-tracking references aka tells git go check what actually exists on the remote right now, and remove any local references to remote branches that no longer really exist there.`git fetch --prune`
+- applies most recent stash and removes it from list: `git stash pop`
+- applies the specified stash and removes it from the list: `git stash pop stash@{stash_number}`
+- `git stash push -m "{description}" {files}`
 - to stash edits I am not ready to commit yet: `git stash`
 - to see list of stashes: `git stash list`
 - to see what is inside a stash (most recent one)`git stash show -p stash@{0}`
