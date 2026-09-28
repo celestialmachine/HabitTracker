@@ -104,3 +104,23 @@
   - Fix: Split the header on the space to isolate just the token, which fixed it
 
 - Pattern across this process: rule out the obvious/easy explanations first then go to the source of truth aka server logs
+
+## Bug: psycopg2.ProgrammingError "no results to fetch"
+
+**The symptom:** I was getting a 201 (success) status code back, but my `except` block was also executing - which seemed contradictory at first.
+
+**Why the misleading status code happened:** My route had `status_code=201` set on the decorator, and my `except` block used `return {...}` instead of `raise HTTPException(...)`. Since `return` (even from inside an except block) looks like a normal, successful completion to FastAPI, it applied the `201` I'd configured - regardless of the fact that my code had actually taken the failure path internally. This taught me that `status_code` on a decorator applies to ANY non-exception-raising return, not specifically to a "happy path" return.
+
+**How I found the real error:** My `except` block was a bare `except:` that silently swallowed whatever the real exception was. I temporarily changed it to `except Exception as e: print(type(e), e)` so I could see the actual exception in my terminal, rather than guessing blindly.
+
+**The real error:** `psycopg2.ProgrammingError: no results to fetch`
+
+**Root cause:** I was calling `cursor.fetchone()` right after an `INSERT` statement that had no `RETURNING` clause. Without `RETURNING`, Postgres has nothing to hand back, so `.fetchone()` has nothing to fetch and throws this error.
+
+**The fix:** Added `RETURNING completion_id` (and other relevant columns) to the `INSERT` statement, giving `.fetchone()` something real to retrieve.
+
+**Takeaways**
+
+- A misleading/wrong status code doesn't always mean the status code logic itself is wrong - sometimes it's a symptom of a swallowed exception via a bare `except` + `return` instead of `raise`.
+- Bare `except:` blocks hide the actual problem. Temporarily catching `Exception as e` and printing it is a fast, low-effort way to surface the real error before deciding on a proper fix.
+- Any `INSERT`/`UPDATE`/`DELETE` that I want to `.fetchone()`/`.fetchall()` after MUST have a `RETURNING` clause - otherwise there's nothing to fetch, even if the statement itself succeeded.

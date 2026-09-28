@@ -25,6 +25,9 @@ A quick-reference guide for running the local server, interacting with the datab
 - applies most recent stash and removes it from list: `git stash pop`
 - applies the specified stash and removes it from the list: `git stash pop stash@{stash_number}`
 - `git stash push -m "{description}" {files}`
+- to stash edits I am not ready to commit yet: `git stash`
+- to see list of stashes: `git stash list`
+- to see what is inside a stash (most recent one)`git stash show -p stash@{0}`
 
 ## PostgreSQL (`psql`) Commands
 
