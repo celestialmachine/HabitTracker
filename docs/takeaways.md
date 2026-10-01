@@ -140,7 +140,7 @@ There are three main places data can travel in an HTTP request, plus a fourth le
 - Similar concept to TypeScript's `function fx(param: string): number` - same idea (annotate expected types), different syntax (`->` in Python vs `:` in TS).
 - Like parameter type hints, NOT enforced by plain Python at runtime - just documentation/IDE support, unless paired with a tool like `mypy`.
 
-## Software Engineering Principles
+## DRY
 
 - DRY (don't repeat yourself) - implemented with my `get_connection()` function, which every route calls to create a connection with the DB, instead of repeating connection code everywhere.
 
@@ -197,3 +197,61 @@ I noticed a pattern in myself: I'll start working on one feature (e.g., GET /hab
 **The bigger takeaway:** this is the same underlying instinct as realizing "I need bcrypt hashing before I can build JWT auth" - discovering a hidden prerequisite mid-task. That happens naturally and isn't a flaw in my process; the skill to build is recognizing EARLY when a prerequisite is substantial enough to deserve its own branch, vs. small enough to just fold into current work.
 
 **For interviews:** this is a good example of self-awareness about workflow/process - I can describe noticing an imperfect git habit in myself, understanding _why_ it's not ideal, and articulating the tradeoff I made (perfect branch hygiene vs. practical solo-project overhead), rather than just blindly following a rule without understanding it.
+
+## Git workflow: the cost of not finishing one branch before starting the next
+
+I spent a long stretch untangling a genuinely confusing multi-branch situation, and traced every single confusing moment back to one root cause: I had multiple branches open/parked simultaneously instead of finishing and merging one before starting the next.
+
+**What went wrong, concretely:**
+
+- Branches went stale (e.g. `mark-habit-complete`, `test-habits-endpoint`) because I started them, then moved to other work before finishing.
+- A branch showed "7 commits ahead, 10 behind main" because it sat parked while other branches merged into `main` in the meantime.
+- I hit real merge conflicts (in `main.py` and my notes files) specifically because `add-get-habits-endpoint` also went stale while other work (is_active flag, GET /habits, completions table) moved forward on/into `main` separately.
+- A stray, confusing PR (#5) got created on top of an already-tangled multi-branch state, adding more noise.
+
+**What I learned:**
+
+- None of this would have happened if I'd finished and merged each branch fully (branch -> work -> PR -> merge -> pull -> delete) before starting the next one.
+- GitHub's "X commits ahead / Y behind" summary can look alarming or confusing, but `git log main..<branch> --oneline` is the ground truth for what's actually unique/unmerged on a branch - worth checking this directly instead of trusting the UI summary when in doubt.
+- Nothing was actually lost in the process - every commit was recoverable, every conflict was resolvable. The mess was about _confusion and time spent_, not lost work. Stashes and local commits are more durable than they feel in the moment of panic.
+
+**The rule going forward:** don't create a new branch until the current one is merged and deleted. If I discover a prerequisite mid-branch, I now have real experience with both "just keep going in this branch" and "the mess that happens when multiple branches drift apart" - so I can make an informed choice each time, rather than defaulting to whichever feels easiest in the moment.
+
+**For interviews:** this is a strong, honest story about learning git workflow discipline through direct experience rather than just reciting best practices - I can walk through what went wrong, why, how I diagnosed it (checking `git log`, `git stash list`, `git branch -a` rather than guessing), and resolved it without losing any work.
+
+## LEFT JOIN and NULL: real constraint vs. query-result placeholder
+
+I ran into a subtle question: if `completions.habit_id` has a `NOT NULL` constraint, how can a `LEFT JOIN` show it as NULL when checking for "no matching completion"? Doesn't that contradict the constraint?
+
+**The resolution - two separate layers:**
+
+- **Real stored data**: the `NOT NULL` constraint fully applies to actual rows stored in the `completions` table. I could never successfully INSERT a row there with a null `habit_id` - the constraint is enforced at the storage level, always.
+- **Query-result placeholders**: a `LEFT JOIN` keeps every row from the left table (`habits`) even when there's no matching row in the right table (`completions`). When there's no match, Postgres fills in NULL for every column that WOULD have come from `completions`, purely as a way to represent "no match" in that one query's output. This doesn't touch, violate, or contradict the real table's constraint at all - it's a temporary placeholder in the result set, not a real null value from a real row.
+
+**Why I should check `completion_id IS NULL` (primary key) rather than `habit_id IS NULL` (a NOT NULL foreign key) when detecting "no match":**
+
+- `habit_id IS NULL` happens to work correctly today, but only because `habit_id` currently has a `NOT NULL` constraint - it's "correct by coincidence," relying on today's schema staying exactly as-is.
+- `completion_id` is the primary key - by definition, a primary key can NEVER be null on a real row, under any possible schema change, ever (short of removing the primary key constraint entirely, which would be a much bigger, deliberate decision).
+- If I ever changed `habit_id` to be nullable for some unrelated reason later (e.g. some future feature), a real completions row could have `habit_id = NULL` - and my LEFT JOIN check would then wrongly treat a real, existing completion as "no match found."
+
+**The general principle:** choose the version of a check that's correct BY DEFINITION (primary key can never be null on a real row), not just correct by coincidence given the current schema. This is the same reasoning as adding explicit UNIQUE/NOT NULL constraints earlier rather than just hoping application code behaves correctly - relying on structural guarantees over incidental/current-state correctness.
+
+if status == "complete":
+cursor.execute(
+"SELECT _
+FROM habits
+INNER JOIN completions
+ON habits.habit_id = completions.habit_id
+WHERE habit.user_id = %s AND habit.is_active = true AND completions.completion_date = CURRENT_DATE;", (user_id,),
+)
+elif status == "incomplete":
+cursor.execute(
+"SELECT _
+FROM habits
+LEFT JOIN completions
+ON habits.habit_id = completions.habit_id
+AND completions.completion_date = CURRENT_DATE
+WHERE habit.user_id = %s AND habit.is_active = true;
+",
+(user_id,),
+)
