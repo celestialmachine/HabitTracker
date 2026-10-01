@@ -242,8 +242,7 @@ cursor.execute(
 FROM habits
 INNER JOIN completions
 ON habits.habit_id = completions.habit_id
-WHERE habit.user_id = %s AND habit.is_active = true AND completion.completion_date = CURRENT_DATE;",
-(user_id,),
+WHERE habit.user_id = %s AND habit.is_active = true AND completions.completion_date = CURRENT_DATE;", (user_id,),
 )
 elif status == "incomplete":
 cursor.execute(
@@ -251,7 +250,8 @@ cursor.execute(
 FROM habits
 LEFT JOIN completions
 ON habits.habit_id = completions.habit_id
-WHERE habit.user_id = %s AND completions.completion_date = CURRENT_DATE AND completions.completion_id is NULL AND habit.is_active = true;
+AND completions.completion_date = CURRENT_DATE
+WHERE habit.user_id = %s AND habit.is_active = true;
 ",
 (user_id,),
 )

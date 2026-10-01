@@ -154,7 +154,7 @@ def create_habit(habit: HabitCreate, request: Request):
 
 @app.get("/habits", status_code=200)
 def get_habits(
-    request: Request, status: str = None
+    request: Request, status: Optional[str] = None
 ):  # status is an optional query param that is appended after '?' in URL
     token = extract_token_from_header(request)
     decoded_payload = verify_token(token)
