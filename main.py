@@ -4,6 +4,7 @@
 
 from fastapi import FastAPI, HTTPException, Request
 from fastapi.middleware.cors import CORSMiddleware
+from typing import Optional
 from database import get_connection
 from auth import (
     hash_password,
@@ -151,8 +152,10 @@ def create_habit(habit: HabitCreate, request: Request):
         conn.close()
 
 
-@app.get("/habits", status_code=201)
-def get_habits(request: Request):
+@app.get("/habits", status_code=200)
+def get_habits(
+    request: Request, status: str = None
+):  # status is an optional query param that is appended after '?' in URL
     token = extract_token_from_header(request)
     decoded_payload = verify_token(token)
     user_id = decoded_payload["user_id"]
@@ -161,8 +164,24 @@ def get_habits(request: Request):
     cursor = conn.cursor()
 
     try:
-        cursor.execute("SELECT * FROM habits WHERE user_id = %s;", (user_id,))
+        if status == "complete":
+            cursor.execute(
+                "SELECT * FROM habits INNER JOIN completions ON habits.habit_id = completions.habit_id WHERE habits.user_id = %s AND habits.is_active = true AND completions.completion_date = CURRENT_DATE;",
+                (user_id,),
+            )
+        elif status == "incomplete":
+            cursor.execute(
+                "SELECT * FROM habits LEFT JOIN completions ON habits.habit_id = completions.habit_id AND completions.completion_date = CURRENT_DATE WHERE user_id = %s AND completions.completion_id is NULL;",
+                (user_id,),
+            )
+        else:
+            cursor.execute(
+                "SELECT * FROM habits WHERE user_id = %s AND is_active = TRUE;",
+                (user_id,),
+            )
+
         habits = cursor.fetchall()
+
         return habits
     except:
         return {"message": "Something went wrong"}
@@ -172,6 +191,7 @@ def get_habits(request: Request):
 
 
 @app.post("/habits/{habit_id}/complete", status_code=201)
+# habit_id is a path param in the URL
 def mark_habit_complete(habit_id: int, request: Request):
     token = extract_token_from_header(request)
     user_id = verify_token(token)["user_id"]  # verify token before proceeding
