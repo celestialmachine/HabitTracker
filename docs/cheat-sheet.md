@@ -20,12 +20,13 @@ A quick-reference guide for running the local server, interacting with the datab
 - merging branch back to main: `git checkout main` AND `git merge {branch_name}`
 - see list of branches: `git branch`
 - push a branch to github for first time: `git push -u origin {name_of_branch_getting_first_push}`
+- (must do on main branch!!) delete an old branch on local repo: `git branch -d {old_branch_name}`
 - delete an old branch from github: `git push origin --delete {old_branch_name}`
 - refresh your remote-tracking references aka tells git go check what actually exists on the remote right now, and remove any local references to remote branches that no longer really exist there.`git fetch --prune`
 - applies most recent stash and removes it from list: `git stash pop`
 - applies the specified stash and removes it from the list: `git stash pop stash@{stash_number}`
-- `git stash push -m "{description}" {files}`
-- to stash edits I am not ready to commit yet: `git stash`
+- to stash only specific files with a description: `git stash push -m "{description}" {files}`
+- to stash edits I am not ready to commit yet (not recommended bc stashes everything): `git stash`
 - to see list of stashes: `git stash list`
 - to see what is inside a stash (most recent one)`git stash show -p stash@{0}`
 
@@ -98,24 +99,62 @@ curl -i -X POST http://localhost:8000/logins \
 -d '{"username": "michy7", "password": "password123"}'
 ```
 
-returned token:
+returned token for michy7:
 eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoxMSwidXNlcm5hbWUiOiJtaWNoeTcifQ.5TUR1RuXTwIWwoo8EB1X2myZ3YwvjTclFx-vYpiIzn4
+
+returned token for michy8:
+eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoxMiwidXNlcm5hbWUiOiJtaWNoeTgifQ.TdZeXT_K6LF0okscrdzIxANcKJ7cYHnW65oJrzVi2a4
 
 ## Add a habit
 
-```
+```michy7
 curl -i -X POST http://localhost:8000/habits \
 -H "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoxMSwidXNlcm5hbWUiOiJtaWNoeTcifQ.5TUR1RuXTwIWwoo8EB1X2myZ3YwvjTclFx-vYpiIzn4" \
 -H "Content-Type: application/json" \
 -d '{"content": "buy a matcha"}'
+```
 
+```michy8
+curl -i -X POST http://localhost:8000/habits \
+-H "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoxMiwidXNlcm5hbWUiOiJtaWNoeTgifQ.TdZeXT_K6LF0okscrdzIxANcKJ7cYHnW65oJrzVi2a4" \
+-H "Content-Type: application/json" \
+-d '{"content": "eat chicken nuggies"}'
 ```
 
 ## Get all habits
 
 ```
 curl -i http://localhost:8000/habits \
--H "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoxMSwidXNlcm5hbWUiOiJtaWNoeTcifQ.5TUR1RuXTwIWwoo8EB1X2myZ3YwvjTclFx-vYpiIzn4" \
--H "Content-Type: application/json"
--d "
+-H "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoxMSwidXNlcm5hbWUiOiJtaWNoeTcifQ.5TUR1RuXTwIWwoo8EB1X2myZ3YwvjTclFx-vYpiIzn4"
+```
+
+## Mark habit as complete for today
+
+```
+curl -i -X POST http://localhost:8000/habits/5/complete \
+-H "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoxMSwidXNlcm5hbWUiOiJtaWNoeTcifQ.5TUR1RuXTwIWwoo8EB1X2myZ3YwvjTclFx-vYpiIzn4"
+```
+
+## Get all complete habits
+
+```michy7
+curl -i "http://localhost:8000/habits?status=complete" \
+-H "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoxMSwidXNlcm5hbWUiOiJtaWNoeTcifQ.5TUR1RuXTwIWwoo8EB1X2myZ3YwvjTclFx-vYpiIzn4"
+```
+
+```michy8
+curl -i "http://localhost:8000/habits?status=complete" \
+-H "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoxMiwidXNlcm5hbWUiOiJtaWNoeTgifQ.TdZeXT_K6LF0okscrdzIxANcKJ7cYHnW65oJrzVi2a4"
+```
+
+## Get all incomplete habits
+
+```michy7
+curl -i "http://localhost:8000/habits?status=incomplete" \
+-H "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoxMSwidXNlcm5hbWUiOiJtaWNoeTcifQ.5TUR1RuXTwIWwoo8EB1X2myZ3YwvjTclFx-vYpiIzn4"
+```
+
+```michy8
+curl -i "http://localhost:8000/habits?status=incomplete" \
+-H "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoxMiwidXNlcm5hbWUiOiJtaWNoeTgifQ.TdZeXT_K6LF0okscrdzIxANcKJ7cYHnW65oJrzVi2a4"
 ```
