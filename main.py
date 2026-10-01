@@ -199,25 +199,11 @@ def mark_habit_complete(habit_id: int, request: Request):
     conn = get_connection()
     cursor = conn.cursor()
     try:
-        cursor.execute(
-            "SELECT user_id FROM habits WHERE habit_id = %s AND user_id = %s;",
-            (
-                habit_id,
-                user_id,
-            ),
-        )
-        match = cursor.fetchone()
-        if match is None:
-            raise HTTPException(
-                status_code=404,
-                detail=f"Habit id#{habit_id} not found.",
-            )
-
+        ensure_habit_valid(cursor, user_id, habit_id)
         cursor.execute(
             "INSERT INTO completions (habit_id) VALUES (%s) RETURNING completion_id;",
             (habit_id,),
         )
-        completion_id = cursor.fetchone()[0]
         conn.commit()
         return {"message": f"Habit id#{habit_id} has been marked as completed"}
     except psycopg2.errors.UniqueViolation as e:
@@ -230,3 +216,35 @@ def mark_habit_complete(habit_id: int, request: Request):
     finally:
         cursor.close()
         conn.close()
+
+
+def mark_habit_incomplete(habit_id: int, request: Request):
+    token = extract_token_from_header(request)
+    user_id = verify_token(token)["user_id"]
+
+    conn = get_connection()
+    cursor = conn.cursor()
+    ensure_habit_valid(cursor, user_id, habit_id)
+
+    try:
+
+        return
+    except:
+        return
+    finally:
+        cursor.close()
+        conn.close()
+
+
+def ensure_habit_valid(cursor, user_id: int, habit_id: int) -> None:
+    cursor.execute(
+        "SELECT habit_id FROM habits WHERE user_id = %s AND habit_id = %s;",
+        (
+            user_id,
+            habit_id,
+        ),
+    )
+    match = cursor.fetchone()  # returns a tuple
+    if match is None:
+        raise HTTPException(status_code=404, detail=f"Habit id#{habit_id} not found.")
+    # implicitly returns None and that is fine since nothing to reutnr
