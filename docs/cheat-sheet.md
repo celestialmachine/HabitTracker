@@ -1,6 +1,6 @@
 # Command Line & CLI Reference
 
-A quick-reference guide for running the local server, interacting with the database, and managing Python dependencies.
+My quick-reference guide cheat sheet for running the local server, interacting with the database, and managing Python dependencies.
 
 ## Python & Project Commands
 
@@ -12,6 +12,7 @@ A quick-reference guide for running the local server, interacting with the datab
 
 ## Git
 
+- compare working directory against staging area (or against last commit): `git diff {file_name}`
 - amend most recent commit: `git commit --amend -m "Your new commit message"`
 - force update the remote server if I already pushed it to github: `git push origin main --force-with-lease`
 - create a new branch and switch to it: `git checkout -b {branch_name}` or `git switch -c {branch_name}`
