@@ -10,7 +10,7 @@
   - get a habit's current streak (could be <= longest streak)
   - get a habit's longest streak
   - mark a habit as completed for the day
-  - unmark a habit
+  - mark a habit as incomplete for the day
   - delete a habit (marks it as inactive)
 - a user can not:
   - mark a complete habit complete again

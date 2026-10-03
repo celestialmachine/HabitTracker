@@ -22,7 +22,7 @@
 1. User sends a POST/habits request to create a new habit by supplying content
 2. BE validates the request, ensuring content is not empty or null (could it be null?)
 3. BE saves the new habit into DB, associated with the user
-4. BE returns the newly created habit as a habit_id and date_created
+4. BE returns the newly created habit
 
 **error/edge cases**
 
@@ -37,6 +37,21 @@
 ### Mark a habit as incomplete for the current date
 
 Deletes the row from the completions table
+**main flow**
+
+1. User sends a DELETE/habits/{habit_id}/complete and provides habit_id
+2. BE validates that there is an existing habit_id for that user
+3. BE queries the completions table for matching habit_id for current_date and deletes that row
+4. BE returns a message that the habit_id has been marked incomplete for today's date
+
+**error/edge cases**
+
+- what if the there isn't an existing habit_id that matches the user? (doesn't exist / belongs to another user) -> raise an HTTP 404 error that a matching habit_id can not be found
+  - how would we know? BE queries habits table for a row where habit_id and user_id both match
+  - if this returns nothing, that means there isn't an existing habit_it
+- what if the user is trying to mark an incomplete habit incomplete again? ana what should happen if a user tries to "unmark" a habit that was never marked complete today in the first place? -> raise an HTTP 404 error that the habit is already marked incomplete
+  - how would we know? 0 rows are affected from the completions table after the DELETE query which means no rows were deleted
+- What if the user tries to mark a habit incomplete from a past date? -> not possible bc the route's DELETE query is hardcoded to `completion_date = CURRENT_DATE`, with no parameter anywhere that lets a client specify a different date. This isn't a validation check rejecting bad input but rather it prevents the user's capability to target a past date.
 
 ### "Delete" a habit
 
