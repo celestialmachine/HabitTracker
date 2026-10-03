@@ -42,3 +42,17 @@ def verify_token(token: str) -> dict:
         raise HTTPException(status_code=401, detail="Expired token.")
     except jwt.InvalidTokenError:
         raise HTTPException(status_code=401, detail="Invalid token.")
+
+
+def ensure_habit_valid(cursor, user_id: int, habit_id: int) -> None:
+    cursor.execute(
+        "SELECT habit_id FROM habits WHERE user_id = %s AND habit_id = %s;",
+        (
+            user_id,
+            habit_id,
+        ),
+    )
+    match = cursor.fetchone()  # returns a tuple
+    if match is None:
+        raise HTTPException(status_code=404, detail=f"Habit id#{habit_id} not found.")
+    # implicitly returns None and that is fine since nothing to reutnr

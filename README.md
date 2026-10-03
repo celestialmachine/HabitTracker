@@ -5,11 +5,14 @@
 - supports multiple users
 - a user can:
   - create a user account
+  - login to their account
   - add a new habit
-  - get their habits
+  - get all their habits
+  - get only complete habits
+  - get only incomplete habits
   - get a habit's current streak (could be <= longest streak)
   - get a habit's longest streak
-  - mark a habit as completed for the day
+  - mark a habit as complete for the day
   - mark a habit as incomplete for the day
   - delete a habit (marks it as inactive)
 - a user can not:
