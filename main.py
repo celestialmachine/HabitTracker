@@ -218,22 +218,45 @@ def mark_habit_complete(habit_id: int, request: Request):
         conn.close()
 
 
+# deletes the specified habit's completion row for current date
+@app.delete("/habits/{habit_id}/complete")
 def mark_habit_incomplete(habit_id: int, request: Request):
     token = extract_token_from_header(request)
     user_id = verify_token(token)["user_id"]
 
     conn = get_connection()
     cursor = conn.cursor()
-    ensure_habit_valid(cursor, user_id, habit_id)
 
     try:
-
-        return
-    except:
-        return
+        # TODO: should ensure_habit_valid be inside or outside try block?
+        ensure_habit_valid(cursor, user_id, habit_id)
+        cursor.execute(
+            "DELETE FROM completions WHERE habit_id = %s AND completion_date = CURRENT_DATE;",
+            (habit_id,),
+        )
+        conn.commit()
+        if cursor.rowcount == 0:
+            return {
+                "message": f"Nothing to unmark. Habit #id{habit_id} has not been completed yet today."
+            }
+        return {"message": f"Habit id#{habit_id} has been marked as incomplete today."}
+    except psycopg2.Error as e:
+        raise HTTPException(status_code=500, detail="Something went wrong")
     finally:
         cursor.close()
         conn.close()
+
+
+"""
+TEST the three scenarios: valid unmark (habit was completed today), 
+"nothing to unmark" (wasn't completed today), 
+and invalid habit (doesn't exist / belongs to another user) — 
+confirm all three respond as expected.
+"""
+
+
+# TODO: implement DELETE/habits/:id route
+# @app.delete("/habits/{id}") # soft delete aka update is_active flag to false
 
 
 def ensure_habit_valid(cursor, user_id: int, habit_id: int) -> None:

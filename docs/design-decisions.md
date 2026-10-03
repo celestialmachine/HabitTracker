@@ -158,3 +158,8 @@ What stops a user from accidentally calling "mark complete" twice in one day, cr
 - `habits.date_created` is missing a `NOT NULL` constraint (has `DEFAULT CURRENT_DATE`, but nothing stops an explicit NULL from being inserted).
 - Same reasoning applies here as `completions.completion_date` - a habit record without a creation date doesn't represent a coherent fact.
 - Low priority, not blocking anything - fix later via a new migration file: `ALTER TABLE habits ALTER COLUMN date_created SET NOT NULL;`
+
+## Mark habit incomplete
+
+- involves deleting the habit's completion row for current date from completions table
+- during dev, decided to run SELECT statement first to make sure I am returning the right row before deleting it!

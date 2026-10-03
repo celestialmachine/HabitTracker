@@ -235,23 +235,3 @@ I ran into a subtle question: if `completions.habit_id` has a `NOT NULL` constra
 - If I ever changed `habit_id` to be nullable for some unrelated reason later (e.g. some future feature), a real completions row could have `habit_id = NULL` - and my LEFT JOIN check would then wrongly treat a real, existing completion as "no match found."
 
 **The general principle:** choose the version of a check that's correct BY DEFINITION (primary key can never be null on a real row), not just correct by coincidence given the current schema. This is the same reasoning as adding explicit UNIQUE/NOT NULL constraints earlier rather than just hoping application code behaves correctly - relying on structural guarantees over incidental/current-state correctness.
-
-if status == "complete":
-cursor.execute(
-"SELECT _
-FROM habits
-INNER JOIN completions
-ON habits.habit_id = completions.habit_id
-WHERE habit.user_id = %s AND habit.is_active = true AND completions.completion_date = CURRENT_DATE;", (user_id,),
-)
-elif status == "incomplete":
-cursor.execute(
-"SELECT _
-FROM habits
-LEFT JOIN completions
-ON habits.habit_id = completions.habit_id
-AND completions.completion_date = CURRENT_DATE
-WHERE habit.user_id = %s AND habit.is_active = true;
-",
-(user_id,),
-)
