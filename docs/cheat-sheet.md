@@ -131,13 +131,20 @@ curl -i http://localhost:8000/habits \
 ## Mark habit as complete for today
 
 ```michy7
-curl -i -X POST http://localhost:8000/habits/5/complete \
+curl -i -X POST http://localhost:8000/habits/7/complete \
 -H "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoxMSwidXNlcm5hbWUiOiJtaWNoeTcifQ.5TUR1RuXTwIWwoo8EB1X2myZ3YwvjTclFx-vYpiIzn4"
 ```
 
 ```michy8
-curl -i -X POST http://localhost:8000/habits/5/complete \
+curl -i -X POST http://localhost:8000/habits/10/complete \
 -H "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoxMiwidXNlcm5hbWUiOiJtaWNoeTgifQ.TdZeXT_K6LF0okscrdzIxANcKJ7cYHnW65oJrzVi2a4"
+```
+
+## Mark habit as incomplete for today
+
+```michy7
+curl -i -X DELETE http://localhost:8000/habits/1/complete \
+-H "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoxMSwidXNlcm5hbWUiOiJtaWNoeTcifQ.5TUR1RuXTwIWwoo8EB1X2myZ3YwvjTclFx-vYpiIzn4"
 ```
 
 ## Get all complete habits
