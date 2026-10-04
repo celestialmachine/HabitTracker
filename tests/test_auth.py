@@ -1,7 +1,11 @@
 import pytest
 from fastapi import HTTPException, Request
-from auth import hash_password, verify_password, extract_token_from_header
-from main import generate_token, verify_token
+from auth import (
+    hash_password,
+    verify_password,
+    generate_token,
+    verify_token,
+)
 from datetime import datetime, timedelta
 
 
